@@ -6,6 +6,7 @@
 #define STORAGE_LEVELDB_DB_MEMTABLE_H_
 
 #include <string>
+#include <map>
 
 #include "db/dbformat.h"
 #include "db/skiplist.h"
@@ -72,7 +73,7 @@ class MemTable {
     int operator()(const char* a, const char* b) const;
   };
 
-  typedef SkipList<const char*, KeyComparator> Table;
+  typedef std::map<const char*, ValueType, KeyComparator, Arena*> Table;
 
   ~MemTable();  // Private since only Unref() should be used to delete it
 

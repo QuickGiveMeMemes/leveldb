@@ -42,32 +42,38 @@ static const char* EncodeKey(std::string* scratch, const Slice& target) {
   scratch->append(target.data(), target.size());
   return scratch->data();
 }
-
 class MemTableIterator : public Iterator {
  public:
-  explicit MemTableIterator(MemTable::Table* table) : iter_(table) {}
+  explicit MemTableIterator(MemTable::Table* table) : iter_(table->begin()),tbl(table) {}
 
   MemTableIterator(const MemTableIterator&) = delete;
   MemTableIterator& operator=(const MemTableIterator&) = delete;
 
   ~MemTableIterator() override = default;
 
-  bool Valid() const override { return iter_.Valid(); }
-  void Seek(const Slice& k) override { iter_.Seek(EncodeKey(&tmp_, k)); }
-  void SeekToFirst() override { iter_.SeekToFirst(); }
-  void SeekToLast() override { iter_.SeekToLast(); }
-  void Next() override { iter_.Next(); }
-  void Prev() override { iter_.Prev(); }
-  Slice key() const override { return GetLengthPrefixedSlice(iter_.key()); }
+  bool Valid() const override { return *iter_==nullptr; }
+  void Seek(const Slice& k) override {
+    MemTable::KeyComparator cmp(tbl_->key_comp());
+    const char * target = EncodeKey(&tmp_, k);
+    while(iter_!=tbl_->end()&&cmp(iter_->first,target)<0) {
+      iter_++;
+    }
+  }
+  void SeekToFirst() override { iter_=tbl_->begin(); }
+  void SeekToLast() override { iter_=tbl_->end(); }
+  void Next() override { iter_++; }
+  void Prev() override { iter_--; }
+  Slice key() const override { return GetLengthPrefixedSlice(iter_->first); }
   Slice value() const override {
-    Slice key_slice = GetLengthPrefixedSlice(iter_.key());
+    Slice key_slice = GetLengthPrefixedSlice(iter_->second);
     return GetLengthPrefixedSlice(key_slice.data() + key_slice.size());
   }
 
   Status status() const override { return Status::OK(); }
 
  private:
-  MemTable::Table::Iterator iter_;
+  MemTable::Table::iterator iter_;
+  MemTable::Table* tbl_;
   std::string tmp_;  // For passing to EncodeKey
 };
 
@@ -75,6 +81,7 @@ Iterator* MemTable::NewIterator() { return new MemTableIterator(&table_); }
 
 void MemTable::Add(SequenceNumber s, ValueType type, const Slice& key,
                    const Slice& value) {
+  /**
   // Format of an entry is concatenation of:
   //  key_size     : varint32 of internal_key.size()
   //  key bytes    : char[internal_key.size()]
@@ -97,6 +104,9 @@ void MemTable::Add(SequenceNumber s, ValueType type, const Slice& key,
   std::memcpy(p, value.data(), val_size);
   assert(p + val_size == buf + encoded_len);
   table_.Insert(buf);
+  */
+  
+
 }
 
 bool MemTable::Get(const LookupKey& key, std::string* value, Status* s) {
