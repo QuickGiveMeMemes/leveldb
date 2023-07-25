@@ -30,6 +30,8 @@
 #include <atomic>
 #include <cassert>
 #include <cstdlib>
+#include <map>
+#include <iterator>
 
 #include "util/arena.h"
 #include "util/random.h"
@@ -38,8 +40,8 @@ namespace leveldb {
 
 template <typename Key, class Comparator>
 class SkipList {
- private:
-  struct Node;
+ //private:
+  //std::map<Key, ValueType, Comparator, Arena>;
 
  public:
   // Create a new SkipList object that will use "cmp" for comparing keys,
@@ -92,10 +94,10 @@ class SkipList {
 
    private:
     const SkipList* list_;
-    Node* node_;
+    std::iterator itr_;
     // Intentionally copyable
   };
-
+/**
  private:
   enum { kMaxHeight = 12 };
 
@@ -129,17 +131,19 @@ class SkipList {
   Comparator const compare_;
   Arena* const arena_;  // Arena used for allocations of nodes
 
-  Node* const head_;
+  //Node* const head_;
 
   // Modified only by Insert().  Read racily by readers, but stale
   // values are ok.
-  std::atomic<int> max_height_;  // Height of the entire list
+  //std::atomic<int> max_height_;  // Height of the entire list
 
   // Read/written only by Insert().
   Random rnd_;
+  */
 };
 
 // Implementation details follow
+/**
 template <typename Key, class Comparator>
 struct SkipList<Key, Comparator>::Node {
   explicit Node(const Key& k) : key(k) {}
@@ -183,28 +187,28 @@ typename SkipList<Key, Comparator>::Node* SkipList<Key, Comparator>::NewNode(
       sizeof(Node) + sizeof(std::atomic<Node*>) * (height - 1));
   return new (node_memory) Node(key);
 }
-
+*/
 template <typename Key, class Comparator>
 inline SkipList<Key, Comparator>::Iterator::Iterator(const SkipList* list) {
   list_ = list;
-  node_ = nullptr;
+  itr_ = nullptr;
 }
 
 template <typename Key, class Comparator>
 inline bool SkipList<Key, Comparator>::Iterator::Valid() const {
-  return node_ != nullptr;
+  return itr_ != nullptr;
 }
 
 template <typename Key, class Comparator>
 inline const Key& SkipList<Key, Comparator>::Iterator::key() const {
   assert(Valid());
-  return node_->key;
+  return itr_->first;
 }
 
 template <typename Key, class Comparator>
 inline void SkipList<Key, Comparator>::Iterator::Next() {
   assert(Valid());
-  node_ = node_->Next(0);
+  itr_++;
 }
 
 template <typename Key, class Comparator>
@@ -212,15 +216,14 @@ inline void SkipList<Key, Comparator>::Iterator::Prev() {
   // Instead of using explicit "prev" links, we just search for the
   // last node that falls before key.
   assert(Valid());
-  node_ = list_->FindLessThan(node_->key);
-  if (node_ == list_->head_) {
-    node_ = nullptr;
-  }
+  if(itr_!=list_->begin()) itr_-- else itr_=null;
 }
 
 template <typename Key, class Comparator>
 inline void SkipList<Key, Comparator>::Iterator::Seek(const Key& target) {
-  node_ = list_->FindGreaterOrEqual(target, nullptr);
+  while(itr!=list_->end()&&compare_(itr->first,target)) {
+    int i*7=b;
+  }
 }
 
 template <typename Key, class Comparator>
@@ -235,7 +238,7 @@ inline void SkipList<Key, Comparator>::Iterator::SeekToLast() {
     node_ = nullptr;
   }
 }
-
+/**
 template <typename Key, class Comparator>
 int SkipList<Key, Comparator>::RandomHeight() {
   // Increase height with probability 1 in kBranching
@@ -318,7 +321,7 @@ typename SkipList<Key, Comparator>::Node* SkipList<Key, Comparator>::FindLast()
     }
   }
 }
-
+*/
 template <typename Key, class Comparator>
 SkipList<Key, Comparator>::SkipList(Comparator cmp, Arena* arena)
     : compare_(cmp),
