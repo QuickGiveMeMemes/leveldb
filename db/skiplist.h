@@ -30,7 +30,7 @@
 #include <atomic>
 #include <cassert>
 #include <cstdlib>
-#include <map>
+#include <set>
 #include <iterator>
 
 #include "util/arena.h"
@@ -40,8 +40,10 @@ namespace leveldb {
 
 template <typename Key, class Comparator>
 class SkipList {
- //private:
-  //std::map<Key, ValueType, Comparator, Arena>;
+ private:
+  std::set<Key, Comparator>* set_;
+  Comparator const compare_;
+  Arena* const arena_;
 
  public:
   // Create a new SkipList object that will use "cmp" for comparing keys,
@@ -94,7 +96,8 @@ class SkipList {
 
    private:
     const SkipList* list_;
-    std::iterator itr_;
+    typename std::set<Key,Comparator>::iterator itr_;
+    bool valid;
     // Intentionally copyable
   };
 /**
@@ -191,18 +194,19 @@ typename SkipList<Key, Comparator>::Node* SkipList<Key, Comparator>::NewNode(
 template <typename Key, class Comparator>
 inline SkipList<Key, Comparator>::Iterator::Iterator(const SkipList* list) {
   list_ = list;
-  itr_ = nullptr;
+  valid = false;
+  itr_ = list_->set_->begin();
 }
 
 template <typename Key, class Comparator>
 inline bool SkipList<Key, Comparator>::Iterator::Valid() const {
-  return itr_ != nullptr;
+  return valid;
 }
 
 template <typename Key, class Comparator>
 inline const Key& SkipList<Key, Comparator>::Iterator::key() const {
   assert(Valid());
-  return itr_->first;
+  return *itr_;
 }
 
 template <typename Key, class Comparator>
@@ -216,27 +220,30 @@ inline void SkipList<Key, Comparator>::Iterator::Prev() {
   // Instead of using explicit "prev" links, we just search for the
   // last node that falls before key.
   assert(Valid());
-  if(itr_!=list_->begin()) itr_-- else itr_=null;
+  if(itr_!=list_->set_->begin()) {
+    itr_--;
+  } else {
+    valid=false;
+  }
 }
 
 template <typename Key, class Comparator>
 inline void SkipList<Key, Comparator>::Iterator::Seek(const Key& target) {
-  while(itr!=list_->end()&&compare_(itr->first,target)) {
-    int i*7=b;
+  while(itr_!=list_->set_->end()&&list_->compare_(*itr_,target)) {
+    itr_++;
   }
 }
 
 template <typename Key, class Comparator>
 inline void SkipList<Key, Comparator>::Iterator::SeekToFirst() {
-  node_ = list_->head_->Next(0);
+  itr_=list_->set_->begin();
+  valid = true;
 }
 
 template <typename Key, class Comparator>
 inline void SkipList<Key, Comparator>::Iterator::SeekToLast() {
-  node_ = list_->FindLast();
-  if (node_ == list_->head_) {
-    node_ = nullptr;
-  }
+  assert(Valid());
+  itr_=list_->set_->end();
 }
 /**
 template <typename Key, class Comparator>
@@ -325,17 +332,11 @@ typename SkipList<Key, Comparator>::Node* SkipList<Key, Comparator>::FindLast()
 template <typename Key, class Comparator>
 SkipList<Key, Comparator>::SkipList(Comparator cmp, Arena* arena)
     : compare_(cmp),
-      arena_(arena),
-      head_(NewNode(0 /* any key will do */, kMaxHeight)),
-      max_height_(1),
-      rnd_(0xdeadbeef) {
-  for (int i = 0; i < kMaxHeight; i++) {
-    head_->SetNext(i, nullptr);
-  }
-}
+      arena_(arena) { }
 
 template <typename Key, class Comparator>
 void SkipList<Key, Comparator>::Insert(const Key& key) {
+  /**
   // TODO(opt): We can use a barrier-free variant of FindGreaterOrEqual()
   // here since Insert() is externally synchronized.
   Node* prev[kMaxHeight];
@@ -366,16 +367,21 @@ void SkipList<Key, Comparator>::Insert(const Key& key) {
     x->NoBarrier_SetNext(i, prev[i]->NoBarrier_Next(i));
     prev[i]->SetNext(i, x);
   }
+  */
+  set_->insert(key);
 }
 
 template <typename Key, class Comparator>
 bool SkipList<Key, Comparator>::Contains(const Key& key) const {
+  /**
   Node* x = FindGreaterOrEqual(key, nullptr);
   if (x != nullptr && Equal(key, x->key)) {
     return true;
   } else {
     return false;
   }
+  */
+  return set_->count(key)==0;
 }
 
 }  // namespace leveldb
