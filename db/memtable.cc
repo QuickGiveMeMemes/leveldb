@@ -96,7 +96,7 @@ void MemTable::Add(SequenceNumber s, ValueType type, const Slice& key,
   p = EncodeVarint32(p, val_size);
   std::memcpy(p, value.data(), val_size);
   assert(p + val_size == buf + encoded_len);
-  Slice a(buf,4+key_size+8+val_size);
+  Slice a(buf,VarintLength(internal_key_size) + internal_key_size);
   table_.Insert(a);
 }
 
