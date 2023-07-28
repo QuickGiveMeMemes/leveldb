@@ -19,7 +19,7 @@ static Slice GetLengthPrefixedSlice(const char* data) {
 }
 
 MemTable::MemTable(const InternalKeyComparator& comparator)
-    : comparator_(comparator), refs_(0), table_(comparator_, &arena_) {}
+    : comparator_(comparator), refs_(0), table_(&arena_) {}
 
 MemTable::~MemTable() { assert(refs_ == 0); }
 
@@ -96,7 +96,8 @@ void MemTable::Add(SequenceNumber s, ValueType type, const Slice& key,
   p = EncodeVarint32(p, val_size);
   std::memcpy(p, value.data(), val_size);
   assert(p + val_size == buf + encoded_len);
-  table_.Insert(buf);
+  Slice a(buf,4+key_size+8+val_size);
+  table_.Insert(a);
 }
 
 bool MemTable::Get(const LookupKey& key, std::string* value, Status* s) {

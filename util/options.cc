@@ -6,9 +6,9 @@
 
 #include "leveldb/comparator.h"
 #include "leveldb/env.h"
-
+#include "db/skiplist.h"
 namespace leveldb {
 
-Options::Options() : comparator(BytewiseComparator()), env(Env::Default()) {}
+Options::Options() : comparator(DefaultCmp()), env(Env::Default()) {}
 
 }  // namespace leveldb
