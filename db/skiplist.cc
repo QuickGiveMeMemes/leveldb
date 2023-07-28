@@ -89,7 +89,11 @@ const char* SkipList::Iterator::key() const {
 
 void SkipList::Iterator::Next() {
   assert(Valid());
-  itr_++;
+  if(itr_==list_->set_->end()) {
+      valid=false;
+  } else {
+      itr_++;
+  }
 }
 
 
@@ -118,8 +122,8 @@ void SkipList::Iterator::SeekToFirst() {
 }
 
 void SkipList::Iterator::SeekToLast() {
-  assert(Valid());
   itr_=list_->set_->end();
+  valid = true;
 }
 SkipList::SkipList(Arena* arena)
     : arena_(arena) {
@@ -173,6 +177,6 @@ bool SkipList::Contains(const Slice& key) const {
     return false;
   }
   */
-  return set_->count(key)==0;
+  return set_->count(key)!=0;
 }
 }
