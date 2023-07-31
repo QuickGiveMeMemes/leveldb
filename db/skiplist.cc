@@ -111,7 +111,7 @@ void SkipList::Iterator::Prev() {
 void SkipList::Iterator::Seek(const Slice& target) {
   SetCmp a;
   Slice b(target);
-  while(itr_!=list_->set_->end()&&a.operator()(*itr_, b)) {
+  while(itr_!=list_->set_->end()&&a(*itr_, b)) {
     itr_++;
   }
 }

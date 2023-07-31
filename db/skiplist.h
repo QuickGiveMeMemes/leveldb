@@ -28,7 +28,6 @@
 // ... prev vs. next pointer ordering ...
 
 #include <atomic>
-#include <cassert>
 #include <cstdlib>
 #include <set>
 #include <iterator>
