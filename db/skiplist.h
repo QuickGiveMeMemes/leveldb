@@ -37,6 +37,7 @@
 #include "leveldb/comparator.h"
 #include "leveldb/slice.h"
 #include "leveldb/export.h"
+#include "util/coding.h"
 
 namespace leveldb {
 
@@ -52,8 +53,15 @@ LEVELDB_EXPORT const Comparator* DefaultCmp();
 
 struct SetCmp {
   bool operator() (Slice a, Slice b) const {
-    int i=a.compare(b);
-    if(a.compare(b)==-1) {
+    uint32_t lenA,lenB;
+    const char * x = a.data();
+    const char * y = b.data();
+    x = GetVarint32Ptr(x,x+5,&lenA);
+    y = GetVarint32Ptr(x,x+5,&lenB);
+    Slice A(x,lenA);
+    Slice B(y,lenB);
+    int i=A.compare(B);
+    if(A.compare(B)==-1) {
         return true;
     }
     return false;
