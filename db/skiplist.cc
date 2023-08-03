@@ -117,11 +117,17 @@ void SkipList::Iterator::Seek(const Slice& target) {
 }
 
 void SkipList::Iterator::SeekToFirst() {
+  if(list_->set_->empty()) {
+    return;
+  }
   itr_=list_->set_->begin();
   valid = true;
 }
 
 void SkipList::Iterator::SeekToLast() {
+  if(list_->set_->empty()) {
+    return;
+  }
   itr_=list_->set_->end();
   valid = true;
 }
