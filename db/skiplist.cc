@@ -89,10 +89,9 @@ const char* SkipList::Iterator::key() const {
 
 void SkipList::Iterator::Next() {
   assert(Valid());
+  itr_++;
   if(itr_==list_->set_->end()) {
       valid=false;
-  } else {
-      itr_++;
   }
 }
 
@@ -129,6 +128,7 @@ void SkipList::Iterator::SeekToLast() {
     return;
   }
   itr_=list_->set_->end();
+  itr_--;
   valid = true;
 }
 SkipList::SkipList(Arena* arena)
