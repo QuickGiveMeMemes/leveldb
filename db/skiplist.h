@@ -60,7 +60,7 @@ struct SetCmp {
     Slice A(x,lenA);
     Slice B(y,lenB);
     int i=A.compare(B);
-    if(A.compare(B)==-1) {
+    if(A.compare(B)<0) {
         return true;
     }
     return false;
