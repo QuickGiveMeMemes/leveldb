@@ -107,11 +107,17 @@ void SkipList::Iterator::Prev() {
   }
 }
 
-void SkipList::Iterator::Seek(const Slice& target) {
+void SkipList::Iterator::Seek(const char * target) {
   SetCmp a;
-  Slice b(target);
-  while(itr_!=list_->set_->end()&&a(*itr_, b)) {
+  uint32_t len;
+  GetVarint32Ptr(target, target + 5, &len);
+  Slice b(target, len);
+  while(a(*itr_, b)) {
     itr_++;
+    if(itr_==list_->set_->end()) {
+      itr_--;
+      break;
+    }
   }
 }
 
@@ -137,7 +143,7 @@ SkipList::SkipList(Arena* arena)
       }
 
 
-void SkipList::Insert(const Slice& key) {
+void SkipList::Insert(const Slice key) {
   /**
   // TODO(opt): We can use a barrier-free variant of FindGreaterOrEqual()
   // here since Insert() is externally synchronized.

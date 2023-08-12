@@ -84,7 +84,7 @@ class SkipList {
 
   // Insert key into the list.
   // REQUIRES: nothing that compares equal to key is currently in the list.
-  void Insert(const Slice& key);
+  void Insert(const Slice key);
 
   // Returns true iff an entry that compares equal to key is in the list.
   bool Contains(const Slice& key) const;
@@ -112,7 +112,7 @@ class SkipList {
     void Prev();
 
     // Advance to the first entry with a key >= target
-    void Seek(const Slice& target);
+    void Seek(const char * target);
 
     // Position at the first entry in list.
     // Final state of iterator is Valid() iff list is not empty.
