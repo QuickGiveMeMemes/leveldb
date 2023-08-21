@@ -56,7 +56,7 @@ struct SetCmp {
     const char * x = a.data();
     const char * y = b.data();
     x = GetVarint32Ptr(x,x+5,&lenA);
-    y = GetVarint32Ptr(x,x+5,&lenB);
+    y = GetVarint32Ptr(y,y+5,&lenB);
     Slice A(x,lenA);
     Slice B(y,lenB);
     int i=A.compare(B);
