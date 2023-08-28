@@ -123,6 +123,7 @@ void SkipList::Iterator::Seek(const char * target) {
 
 void SkipList::Iterator::SeekToFirst() {
   if(list_->set_->empty()) {
+    valid = false;
     return;
   }
   itr_=list_->set_->begin();
@@ -131,6 +132,7 @@ void SkipList::Iterator::SeekToFirst() {
 
 void SkipList::Iterator::SeekToLast() {
   if(list_->set_->empty()) {
+    valid = false;
     return;
   }
   itr_=list_->set_->end();

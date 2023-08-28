@@ -37,6 +37,7 @@
 #include "leveldb/slice.h"
 #include "leveldb/export.h"
 #include "util/coding.h"
+#include "dbformat.h"
 
 namespace leveldb {
 
@@ -59,11 +60,20 @@ struct SetCmp {
     y = GetVarint32Ptr(y,y+5,&lenB);
     Slice A(x,lenA);
     Slice B(y,lenB);
-    int i=A.compare(B);
-    if(A.compare(B)<0) {
-        return true;
+    Slice aUser = ExtractUserKey(A);
+    Slice bUser = ExtractUserKey(B);
+    int i=aUser.compare(bUser);
+    if(i < 0) {
+      return true;
     }
-    return false;
+    if(i > 0) {
+      return false;
+    }
+    else {
+      const uint64_t anum = DecodeFixed64(A.data() + A.size() - 8);
+      const uint64_t bnum = DecodeFixed64(B.data() + B.size() - 8);
+      return anum > bnum;
+    }
   }
 };
 
