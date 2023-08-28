@@ -72,7 +72,7 @@ class MemTable {
     int operator()(const char* a, const char* b) const;
   };
 
-  typedef SkipList<const char*, KeyComparator> Table;
+  typedef SkipList Table;
 
   ~MemTable();  // Private since only Unref() should be used to delete it
 

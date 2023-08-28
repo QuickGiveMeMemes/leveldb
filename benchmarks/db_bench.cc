@@ -20,6 +20,7 @@
 #include "util/mutexlock.h"
 #include "util/random.h"
 #include "util/testutil.h"
+#include "db/skiplist.h"
 
 // Comma-separated list of operations to run in the specified order
 //   Actual benchmarks:
@@ -436,7 +437,7 @@ class Benchmark {
   WriteOptions write_options_;
   int reads_;
   int heap_counter_;
-  CountComparator count_comparator_;
+  DefaultCmpI count_comparator_;
   int total_thread_count_;
 
   void PrintHeader() {
@@ -529,7 +530,6 @@ class Benchmark {
         entries_per_batch_(1),
         reads_(FLAGS_reads < 0 ? FLAGS_num : FLAGS_reads),
         heap_counter_(0),
-        count_comparator_(BytewiseComparator()),
         total_thread_count_(0) {
     std::vector<std::string> files;
     g_env->GetChildren(FLAGS_db, &files);
@@ -741,11 +741,13 @@ class Benchmark {
       arg[0].thread->stats.Merge(arg[i].thread->stats);
     }
     arg[0].thread->stats.Report(name);
+    /**
     if (FLAGS_comparisons) {
       fprintf(stdout, "Comparisons: %zu\n", count_comparator_.comparisons());
       count_comparator_.reset();
       fflush(stdout);
     }
+    */
 
     for (int i = 0; i < n; i++) {
       delete arg[i].thread;
